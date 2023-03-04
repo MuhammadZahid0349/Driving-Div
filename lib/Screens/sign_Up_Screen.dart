@@ -51,6 +51,16 @@ class SignUpScreen extends StatelessWidget {
                     ),
                     20.h.heightBox,
                     TextFormField(
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter Email';
+                        } else if (!value.contains('@')) {
+                          return 'Please enter Valid Email';
+                        } else if (!value.contains('.com')) {
+                          return 'Please enter Valid Email';
+                        }
+                        return null;
+                      },
                       controller: emailTextController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
@@ -91,9 +101,6 @@ class SignUpScreen extends StatelessWidget {
                           if (nameTextController.text.length < 5) {
                             displayToastMsg(
                                 "Name must be at least 4 characters", context);
-                          } else if (emailTextController.text.contains("@")) {
-                            displayToastMsg(
-                                "Email address is not valid", context);
                           } else if (phoneTextController.text.isEmpty) {
                             displayToastMsg(
                                 "Phone Number is mandatory", context);
@@ -125,6 +132,7 @@ class SignUpScreen extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   void registerNewUser(BuildContext context) async {
+    
     // final User firebaseUser = (await _auth.createUserWithEmailAndPassword(email: emailTextController.text, password: passwordTextController.text)).user!;
 
     UserCredential userCredential = await _auth

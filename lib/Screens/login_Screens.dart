@@ -1,4 +1,8 @@
+import 'package:driving_div/Screens/main_Screen.dart';
 import 'package:driving_div/Screens/sign_Up_Screen.dart';
+import 'package:driving_div/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
@@ -7,7 +11,10 @@ import 'package:get/get.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  LoginScreen({super.key});
+
+  TextEditingController emailTextController = TextEditingController();
+  TextEditingController passwordTextController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +39,17 @@ class LoginScreen extends StatelessWidget {
                   children: [
                     20.h.heightBox,
                     TextFormField(
+                      controller: emailTextController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter Email';
+                        } else if (!value.contains('@')) {
+                          return 'Please enter Valid Email';
+                        } else if (!value.contains('.com')) {
+                          return 'Please enter Valid Email';
+                        }
+                        return null;
+                      },
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                           labelText: "Email",
@@ -41,7 +59,8 @@ class LoginScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 14.sp),
                     ),
                     20.h.heightBox,
-                    TextFormField(
+                    TextField(
+                      controller: passwordTextController,
                       obscureText: true,
                       decoration: InputDecoration(
                           labelText: "Password",
@@ -53,7 +72,12 @@ class LoginScreen extends StatelessWidget {
                     20.h.heightBox,
                     ElevatedButton(
                         onPressed: () {
-                          print("Logged in button Cliked .....");
+                          if (passwordTextController.text.isEmpty) {
+                            displayToastMsg(
+                                "Password is Mandatory !!", context);
+                          } else {
+                            loginedUser(context);
+                          }
                         },
                         child: Text("Login")),
                     20.h.heightBox,
@@ -70,5 +94,46 @@ class LoginScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  void loginedUser(BuildContext context) async {
+    final User firebaseUser = (await _auth
+            .createUserWithEmailAndPassword(
+                email: emailTextController.text,
+                password: passwordTextController.text)
+            .catchError((errMsg) {
+      displayToastMsg("Error " + errMsg.toString(), context);
+    }))
+        .user!;
+    // UserCredential userCredential = await _auth
+    //     .signInWithEmailAndPassword(
+    //         email: emailTextController.text.trim(),
+    //         password: passwordTextController.text.trim())
+    //     .catchError((errMsg) {
+    //   displayToastMsg("Error " + errMsg.toString(), context);
+    // });
+
+    // final User user = userCredential.user!;
+
+    if (firebaseUser != null) {
+      userRef
+          .child(firebaseUser.uid)
+          .once()
+          .then((value) => (DataSnapshot snap) {
+                if (snap.value != null) {
+                  Get.to(() => MainScreen());
+                  displayToastMsg("Your are Logged in now!!", context);
+                } else {
+                  _auth.signOut();
+                  displayToastMsg(
+                      "No record exists for this user  \n Please create a new Account!!",
+                      context);
+                }
+              });
+    } else {
+      displayToastMsg("Error Occured can not been Login!!", context);
+    }
   }
 }
