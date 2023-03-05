@@ -1,4 +1,5 @@
 import 'package:driving_div/Screens/login_Screens.dart';
+import 'package:driving_div/Screens/main_Screen.dart';
 import 'package:driving_div/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,7 +19,6 @@ void main() async {
 
 DatabaseReference userRef = FirebaseDatabase.instance.ref().child("users");
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               title: 'Driving Div',
               builder: EasyLoading.init(),
-              home: LoginScreen());
+              home: MainScreen());
         });
   }
 }

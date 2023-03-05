@@ -100,7 +100,7 @@ class LoginScreen extends StatelessWidget {
 
   void loginedUser(BuildContext context) async {
     final User firebaseUser = (await _auth
-            .createUserWithEmailAndPassword(
+            .signInWithEmailAndPassword(
                 email: emailTextController.text,
                 password: passwordTextController.text)
             .catchError((errMsg) {
