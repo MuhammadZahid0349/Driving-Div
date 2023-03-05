@@ -25,16 +25,38 @@ class _MainScreenState extends State<MainScreen> {
   double bottomPaddingMap = 0;
 
   void locatePosition() async {
+    // Position position = await Geolocator.getCurrentPosition(
+    //     desiredAccuracy: LocationAccuracy.high);
+    try {
+      Position position = await _determinePosition();
+      currentPosition = position;
+      LatLng latLatPosition = LatLng(position.latitude, position.longitude);
+
+      CameraPosition cameraPosition =
+          CameraPosition(target: latLatPosition, zoom: 14);
+      newGoogleMapController
+          .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<Position> _determinePosition() async {
+    // bool serviceEnabled;
+    LocationPermission permission;
+    // serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    // if (!serviceEnabled) {
+    //   return Future.error('Location services are disabled');
+    // }
+    permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      permission = await Geolocator.requestPermission();
+    }
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    currentPosition = position;
-
-    LatLng latLatPosition = LatLng(position.latitude, position.longitude);
-
-    CameraPosition cameraPosition =
-        CameraPosition(target: latLatPosition, zoom: 14);
-    newGoogleMapController
-        .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    return position;
   }
 
   static const CameraPosition _kGooglePlex = CameraPosition(
